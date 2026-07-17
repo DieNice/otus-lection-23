@@ -1,0 +1,715 @@
+{
+  "info": {
+    "_postman_id": "289665e7-3eba-4c81-b03b-56edef524c22",
+    "name": "lection-23",
+    "description": "Тесты сценария регистрации, авторизации и управления профилем пользователя",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "13934503"
+  },
+  "item": [
+    {
+      "name": "1. Регистрация пользователя 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('User created successfully', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('id');",
+              "    pm.expect(response).to.have.property('username');",
+              "    pm.expect(response).to.have.property('email');",
+              "    pm.expect(response).to.have.property('firstName');",
+              "    pm.expect(response).to.have.property('lastName');",
+              "    pm.expect(response).to.have.property('phone');",
+              "    pm.expect(response).to.have.property('is_active');",
+              "    pm.expect(response.is_active).to.equal(true);",
+              "});",
+              "",
+              "pm.test('User data matches request', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.username).to.equal(pm.variables.get('user1_username'));",
+              "    pm.expect(response.email).to.equal(pm.variables.get('user1_email'));",
+              "    pm.expect(response.firstName).to.equal(pm.variables.get('user1_first_name'));",
+              "    pm.expect(response.lastName).to.equal(pm.variables.get('user1_last_name'));",
+              "    pm.expect(response.phone).to.equal(pm.variables.get('user1_phone'));",
+              "});",
+              "",
+              "pm.test('Response time is less than 500ms', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Pre-request Script для коллекции\r",
+              "function generateRandomString(length = 8) {\r",
+              "    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';\r",
+              "    let result = '';\r",
+              "    for (let i = 0; i < length; i++) {\r",
+              "        result += chars.charAt(Math.floor(Math.random() * chars.length));\r",
+              "    }\r",
+              "    return result;\r",
+              "}\r",
+              "\r",
+              "function generateUserData() {\r",
+              "    const username = `user_${generateRandomString(6)}`;\r",
+              "    const password = `Pass${generateRandomString(8)}!@#`;\r",
+              "    const firstName = `First${generateRandomString(4)}`;\r",
+              "    const lastName = `Last${generateRandomString(4)}`;\r",
+              "    const email = `${username}@example.com`;\r",
+              "    const phone = `+7${Math.floor(1000000000 + Math.random() * 9000000000)}`;\r",
+              "    \r",
+              "    return { username, password, firstName, lastName, email, phone };\r",
+              "}\r",
+              "\r",
+              "const user1Data = generateUserData();\r",
+              "pm.variables.set('user1_username', user1Data.username);\r",
+              "pm.variables.set('user1_password', user1Data.password);\r",
+              "pm.variables.set('user1_first_name', user1Data.firstName);\r",
+              "pm.variables.set('user1_last_name', user1Data.lastName);\r",
+              "pm.variables.set('user1_email', user1Data.email);\r",
+              "pm.variables.set('user1_phone', user1Data.phone);\r",
+              "\r",
+              "pm.variables.set('user1_updated_first_name', `Updated${Math.random().toString(36).substring(2, 6)}`);\r",
+              "pm.variables.set('user1_updated_last_name', `Updated${Math.random().toString(36).substring(2, 6)}`);\r",
+              "pm.variables.set('user1_updated_email', `updated_${user1Data.username}@example.com`);\r",
+              "pm.variables.set('user1_updated_phone', `+7${Math.floor(1000000000 + Math.random() * 9000000000)}`);\r",
+              "\r",
+              "const user2Data = generateUserData();\r",
+              "pm.variables.set('user2_username', user2Data.username);\r",
+              "pm.variables.set('user2_password', user2Data.password);\r",
+              "pm.variables.set('user2_first_name', user2Data.firstName);\r",
+              "pm.variables.set('user2_last_name', user2Data.lastName);\r",
+              "pm.variables.set('user2_email', user2Data.email);\r",
+              "pm.variables.set('user2_phone', user2Data.phone);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"{{user1_username}}\",\n    \"password\": \"{{user1_password}}\",\n    \"email\": \"{{user1_email}}\",\n    \"first_name\": \"{{user1_first_name}}\",\n    \"last_name\": \"{{user1_last_name}}\",\n    \"phone\": \"{{user1_phone}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Попытка получить профиль без логина",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 401 Unauthorized', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "",
+              "pm.test('Response contains error detail', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('detail');",
+              "    pm.expect(response.detail).to.include('Not authenticated');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Попытка обновить профиль без логина",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 401 Unauthorized', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "",
+              "pm.test('Response contains error detail', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('detail');",
+              "    pm.expect(response.detail).to.include('Not authenticated');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"first_name\": \"UpdatedName\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Вход пользователя 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Token received', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('access_token');",
+              "    pm.expect(response).to.have.property('token_type');",
+              "    pm.expect(response.token_type).to.equal('bearer');",
+              "});",
+              "",
+              "pm.test('Token is valid format', function () {",
+              "    const response = pm.response.json();",
+              "    const token = response.access_token;",
+              "    pm.expect(token.split('.')).to.have.lengthOf(3);",
+              "});",
+              "",
+              "pm.environment.set('user1_token', pm.response.json().access_token);",
+              "",
+              "pm.test('Response time is less than 500ms', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(500);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{user1_username}}"
+            },
+            {
+              "key": "password",
+              "value": "{{user1_password}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Получение профиля пользователя 1 (авторизован)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Profile data is correct', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('id');",
+              "    pm.expect(response).to.have.property('username');",
+              "    pm.expect(response).to.have.property('email');",
+              "    pm.expect(response).to.have.property('firstName');",
+              "    pm.expect(response).to.have.property('lastName');",
+              "    pm.expect(response).to.have.property('phone');",
+              "    pm.expect(response).to.have.property('is_active');",
+              "    pm.expect(response.username).to.equal(pm.variables.get('user1_username'));",
+              "    pm.expect(response.firstName).to.equal(pm.variables.get('user1_first_name'));",
+              "    pm.expect(response.email).to.equal(pm.variables.get('user1_email'));",
+              "    pm.expect(response.is_active).to.equal(true);",
+              "});",
+              "",
+              "pm.environment.set('user1_id', pm.response.json().id.toString());"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user1_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/user/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Обновление профиля пользователя 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Profile updated successfully', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('message');",
+              "    pm.expect(response.message).to.equal('Profile updated successfully');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user1_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"first_name\": \"{{user1_updated_first_name}}\",\n    \"last_name\": \"{{user1_updated_last_name}}\",\n    \"email\": \"{{user1_updated_email}}\",\n    \"phone\": \"{{user1_updated_phone}}\",\n    \"password\": \"{{user1_password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Проверка что профиль изменился",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Profile updated successfully', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response.firstName).to.equal(pm.variables.get('user1_updated_first_name'));",
+              "    pm.expect(response.lastName).to.equal(pm.variables.get('user1_updated_last_name'));",
+              "    pm.expect(response.email).to.equal(pm.variables.get('user1_updated_email'));",
+              "    pm.expect(response.phone).to.equal(pm.variables.get('user1_updated_phone'));",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user1_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/user/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8. Регистрация пользователя 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('User created successfully', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('id');",
+              "    pm.expect(response).to.have.property('username');",
+              "    pm.expect(response.username).to.equal(pm.variables.get('user2_username'));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"{{user2_username}}\",\n    \"password\": \"{{user2_password}}\",\n    \"email\": \"{{user2_email}}\",\n    \"first_name\": \"{{user2_first_name}}\",\n    \"last_name\": \"{{user2_last_name}}\",\n    \"phone\": \"{{user2_phone}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "9. Вход пользователя 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Token received', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('access_token');",
+              "    pm.expect(response).to.have.property('token_type');",
+              "    pm.expect(response.token_type).to.equal('bearer');",
+              "});",
+              "",
+              "pm.environment.set('user2_token', pm.response.json().access_token);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{user2_username}}"
+            },
+            {
+              "key": "password",
+              "value": "{{user2_password}}"
+            },
+            {
+              "key": "grant_type",
+              "value": "password"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10. Проверка доступа пользователя 2 к профилю пользователя 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 403 Forbidden', function () {",
+              "    pm.response.to.have.status(403);",
+              "});",
+              "",
+              "pm.test('Access denied message', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('detail');",
+              "    pm.expect(response.detail).to.include('You can only access your own profile');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user2_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/user/{{user1_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{user1_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11. Проверка редактирования профиля пользователя 1 пользователем 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 403 Forbidden', function () {",
+              "    pm.response.to.have.status(403);",
+              "});",
+              "",
+              "pm.test('Access denied message', function () {",
+              "    const response = pm.response.json();",
+              "    pm.expect(response).to.have.property('detail');",
+              "    pm.expect(response.detail).to.include('You can only update your own account');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user2_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"first_name\": \"HackedName\",\n    \"last_name\":  \"HackedLastName\",\n    \"email\": \"HackedEmal@mail.ru\",\n    \"phone\": \"phone_example\",\n    \"password\": \"set_hacked_password\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user/{{user1_id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{user1_id}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://arch.homework"
+    },
+    {
+      "key": "user1_username",
+      "value": ""
+    },
+    {
+      "key": "user1_password",
+      "value": ""
+    },
+    {
+      "key": "user1_token",
+      "value": ""
+    },
+    {
+      "key": "user1_id",
+      "value": ""
+    },
+    {
+      "key": "user2_username",
+      "value": ""
+    },
+    {
+      "key": "user2_password",
+      "value": ""
+    },
+    {
+      "key": "user2_token",
+      "value": ""
+    },
+    {
+      "key": "user2_id",
+      "value": ""
+    }
+  ]
+}
