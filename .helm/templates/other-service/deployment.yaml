@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.otherApp.name}}-deployment
+  labels:
+    app: {{.Values.otherApp.name}}
+    environment: prod 
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{.Values.otherApp.name}}
+      environment: prod 
+  template:
+    metadata:
+      labels:
+        app: {{.Values.otherApp.name}}
+        environment: prod 
+    spec:
+      containers:
+      - name: dienice-{{.Values.otherApp.name}} 
+        image: "{{.Values.otherApp.repository}}:{{ .Values.otherApp.tag }}" 
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: CONFIG_NAME 
+          valueFrom:
+            configMapKeyRef:
+              name: {{.Values.otherApp.name}}-config
+              key: CONFIG_NAME 
+        - name: GRAYLOG_URL 
+          valueFrom:
+            configMapKeyRef:
+              name: {{.Values.otherApp.name}}-config
+              key: GRAYLOG_URL 
+        - name: GRAYLOG_PORT 
+          valueFrom:
+            configMapKeyRef:
+              name: {{.Values.otherApp.name}}-config
+              key: GRAYLOG_PORT 
+        - name: DATABASE_URI
+          valueFrom:
+            secretKeyRef:
+              name: {{.Values.app.name}}-secret 
+              key: DATABASE_URI  
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3

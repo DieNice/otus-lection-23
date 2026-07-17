@@ -1,0 +1,16 @@
+architecture: "standalone"  # или "replication" для HA
+
+auth:
+  username: "service"
+  password: "password"
+  database: "user_test_db"
+  postgresPassword: "password"
+  replicationPassword: "password"
+
+passwordUpdateJob:
+  enabled: false
+
+
+service:
+  type: ClusterIP
+  port: 5432
