@@ -1,0 +1,114 @@
+x-common-variables: &common-variables
+  CONFIG_NAME: test
+  DATABASE_URI_TEST: postgresql+asyncpg://service:password@postgres-test:5432/user_test_db
+  DATABASE_ECHO_TEST: true
+  SECRET_KEY_TEST: 'super_secrey_key'
+
+
+x-postgres-configuration: &postgres-configuration
+  image: postgres:13-alpine
+  environment:
+    POSTGRES_USER: service
+    POSTGRES_PASSWORD: password
+    POSTGRES_DB: user_test_db
+  networks:
+    - backend_net
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready", "-d", "user_test_db"]
+    interval: 30s
+    timeout: 90s
+    retries: 10
+    start_period: 30s
+
+
+services:
+  auth:
+    build:
+      context: ./user-auth-service
+      dockerfile: Dockerfile
+      target: test 
+    command: uvicorn app:app --host 0.0.0.0
+    volumes:
+      - ..:/usr/src/tmp/pytest-report/
+      - ..:/usr/src/tmp/code-codequality-report/
+      - ..:/usr/src/tmp/mypy-report/
+    environment:
+      <<: *common-variables
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - backend_net
+    profiles: ["test"]
+  
+  auth-develop:
+    build:
+      context: ./user-auth-service
+      dockerfile: Dockerfile
+      target: test 
+    ports:
+     - 8004:8000
+    command: uvicorn app:app --host 0.0.0.0 --port=8000 --reload
+    environment:
+      <<: *common-variables
+    depends_on:
+      postgres-develop:
+        condition: service_healthy
+    networks:
+      - backend_net
+    profiles: ["develop"]
+
+  other-service:
+    build:
+      context: ./other-service
+      dockerfile: Dockerfile
+      target: test 
+    command: uvicorn app:app --host 0.0.0.0
+    volumes:
+      - ..:/usr/src/tmp/pytest-report/
+      - ..:/usr/src/tmp/code-codequality-report/
+      - ..:/usr/src/tmp/mypy-report/
+    environment:
+      <<: *common-variables
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - backend_net
+    profiles: ["test"]
+  
+  other-service-develop:
+    build:
+      context: ./other-service
+      dockerfile: Dockerfile
+      target: test 
+    ports:
+     - 8005:8000
+    command: uvicorn app:app --host 0.0.0.0 --port=8000 --reload
+    environment:
+      <<: *common-variables
+    depends_on:
+      postgres-develop:
+        condition: service_healthy
+    networks:
+      - backend_net
+    profiles: ["develop"]
+
+  postgres-test:
+    <<: *postgres-configuration
+    profiles: ["test"]
+
+  postgres-develop:
+    <<: *postgres-configuration
+    ports:
+      - 5432:5432
+    profiles: ["develop"]
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+
+volumes:
+  pg_data:
+
+networks:
+  backend_net:

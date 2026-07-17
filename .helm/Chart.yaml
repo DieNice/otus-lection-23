@@ -1,0 +1,12 @@
+apiVersion: v2
+name: lection-23
+version: 0.0.1 
+description: Test project for lection-23
+keywords:
+  - lection-23
+sources:
+  - https://github.com/DieNice/otus-lection-23
+maintainers:
+  - name: DieNice 
+    email: DailyPlanning@bk.ru 
+appVersion: 0.0.3 

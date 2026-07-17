@@ -1,0 +1,22 @@
+app:
+  name: auth
+
+otherApp:
+  name: other
+  repository: "docker.io/library/other-app"
+  tag: 0.0.1
+
+
+replicaCount: 2
+image:
+  repository: docker.io/library/auth-app
+  tag: 0.0.1
+ingress:
+  host: arch.homework
+db:
+  host: my-postgres-postgresql
+  name: mydb
+  port: 5432
+secret:
+  user: myuser
+  password: mypassword

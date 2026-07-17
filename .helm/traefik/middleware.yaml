@@ -1,0 +1,25 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-middleware
+  namespace: default
+spec:
+  forwardAuth:
+    address: http://auth-service.default.svc.cluster.local:80/auth/verify
+    authResponseHeaders:
+      - "X-User-ID"
+      - "X-Username"
+      - "X-Email"
+    authResponseHeadersRegex: ^X-Auth-.*
+    trustForwardHeader: true
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rewrite-path
+  namespace: default
+spec:
+  replacePathRegex:
+    regex: ^/other-service/(.*)
+    replacement: /$1
